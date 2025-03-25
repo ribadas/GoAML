@@ -5,66 +5,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>goAML Report - Expandable Tree</title>
   <style>
+    body {
+      background-color: #f0f4f8; /* Light blue-gray background for the page */
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #2c3e50; /* Dark blue-gray for text */
+    }
+
+    h1 {
+      color: #1a73e8; /* Bright blue for the heading */
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
     .tree ul {
       list-style-type: none;
       padding-left: 20px;
     }
+
     .tree li {
-      margin: 5px 0;
+      margin: 8px 0;
       position: relative;
+      transition: all 0.2s ease; /* Smooth transition for hover effects */
     }
+
     .tree li.has-children::before {
       content: "▶";
-      margin-right: 5px;
+      margin-right: 8px;
       cursor: pointer;
-      color: #333;
+      color: #4285f4; /* Medium blue for the expand/collapse icon */
+      font-size: 12px;
+      transition: transform 0.2s ease;
     }
+
     .tree li.has-children.open::before {
       content: "▼";
+      transform: rotate(90deg);
     }
+
     .tree ul.hidden {
       display: none;
     }
+
     .tree li {
-      font-family: Arial, sans-serif;
       font-size: 14px;
+      line-height: 1.5;
     }
+
     .tree .label {
-      font-weight: bold;
-      color: #2c3e50;
+      font-weight: 600;
+      color: #1a73e8; /* Bright blue for labels */
       cursor: pointer;
       position: relative;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
     }
+
+    .tree .label:hover {
+      background-color: #e8f0fe; /* Light blue background on hover */
+    }
+
     .tree .value {
-      color: #7f8c8d;
+      color: #5f6368; /* Muted blue-gray for values */
+      font-weight: normal;
     }
+
     .tree .label:hover::after {
       content: attr(data-tooltip);
       position: absolute;
-      background: #333;
-      color: #fff;
-      padding: 5px 10px;
+      background: #1a73e8; /* Bright blue for tooltip background */
+      color: #ffffff;
+      padding: 6px 12px;
       border-radius: 4px;
-      top: -30px;
+      top: -35px;
       left: 0;
       white-space: nowrap;
       z-index: 10;
+      font-size: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
     .lookup-values {
       display: none;
-      background: #f0f0f0;
-      padding: 5px;
+      background: #e8f0fe; /* Light blue background for lookup values */
+      padding: 8px;
       margin-top: 5px;
       border-radius: 4px;
+      border: 1px solid #d2e3fc; /* Subtle blue border */
       font-size: 12px;
+      color: #174ea6; /* Darker blue for lookup text */
     }
+
     .lookup-values ul {
       list-style-type: none;
       padding: 0;
       margin: 0;
     }
+
     .lookup-values li {
-      margin: 2px 0;
+      margin: 4px 0;
+      padding-left: 10px;
+      position: relative;
+    }
+
+    .lookup-values li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #4285f4; /* Medium blue for bullet points */
+    }
+
+    /* Add subtle animation for expanding/collapsing */
+    .tree ul {
+      transition: max-height 0.3s ease;
+    }
+
+    .tree ul.hidden {
+      max-height: 0;
+      overflow: hidden;
+    }
+
+    .tree ul:not(.hidden) {
+      max-height: 1000px; /* Adjust based on content */
     }
   </style>
 </head>
@@ -73,7 +139,7 @@
   <div id="tree" class="tree"></div>
 
   <script>
-    // Updated field dictionary with code and description for lookup values
+    // Field dictionary with descriptions and lookup values (code and description)
     const fieldDictionary = {
       "rentity_id": { description: "Unique identifier of the reporting entity (e.g., FIU-DE-001).", lookup_values: null },
       "rentity_branch": { description: "Branch of the reporting entity submitting the report.", lookup_values: null },
@@ -289,7 +355,7 @@
       "branch_name": { description: "Name of the branch where the transaction occurred.", lookup_values: null }
     };
 
-    // XML string (same as before)
+    // XML string
     const xmlString = `<?xml version="1.0" encoding="UTF-8"?>
 <goaml xmlns="http://www.goaml.org/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.goaml.org/schema goAMLSchema.xsd">
   <report>
