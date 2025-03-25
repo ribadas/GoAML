@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Full XML Schema Visualization with Multiple Transactions</title>
+  <title>XML Schema Visualization (FIU goAML Specification)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -50,7 +50,7 @@
   </style>
 </head>
 <body>
-  <h2>Full XML Schema Visualization with Multiple Transactions</h2>
+  <h2>XML Schema Visualization (FIU goAML Specification)</h2>
   <ul class="tree">
     <li class="toggle">report
       <ul class="hidden">
@@ -62,6 +62,15 @@
         <li><span class="key optional">fiu_ref_number:</span> <span>"FIU-2025-XYZ"</span></li>
         <li><span class="key required">submission_date:</span> <span>"2025-03-25T14:30:00"</span></li>
         <li><span class="key required">currency_code_local:</span> <span class="lookup">"EUR"</span> (currency_type)</li>
+        <li class="toggle">reporting_entity <span class="optional">(Opt.)</span>
+          <ul class="hidden">
+            <li><span class="key required">entity_id:</span> <span>1002345</span></li>
+            <li><span class="key optional">branch:</span> <span>"Berlin Main Branch"</span></li>
+            <!-- incorporation_country_code as per the PDF -->
+            <li><span class="key required">incorporation_country_code:</span> <span class="lookup">"DE"</span> (country_type)</li>
+            <li><span class="key required">country_code:</span> <span class="lookup">"DE"</span> (country_type)</li>
+          </ul>
+        </li>
         <li class="toggle">reporting_person <span class="optional">(Opt.)</span>
           <ul class="hidden">
             <li><span class="key required">first_name:</span> <span>"John"</span></li>
@@ -78,6 +87,7 @@
             <li><span class="key required">country_code:</span> <span class="lookup">"DE"</span> (country_type)</li>
           </ul>
         </li>
+        <!-- The official specification uses the fields 'reason' and 'action' (repurposed fields) -->
         <li><span class="key optional">reason:</span> <span>"Suspicious transaction with unclear origin."</span></li>
         <li><span class="key optional">action:</span> <span>"Pending further investigation."</span></li>
         <li class="toggle">transaction <span class="required">(Multiple)</span>
@@ -187,7 +197,8 @@
                 <li class="toggle">t_from_my_client
                   <ul class="hidden">
                     <li><span class="key required">from_funds_code:</span> <span class="lookup">"2"</span> (funds_type) - Deposit</li>
-                    <!-- No foreign currency provided for this transaction -->\n                    <li class="toggle">from_person (t_person_my_client)
+                    <!-- No foreign currency provided for this transaction -->                    
+                    <li class="toggle">from_person (t_person_my_client)
                       <ul class="hidden">
                         <li><span class="key required">gender:</span> <span class="lookup">"F"</span> (gender_type)</li>
                         <li><span class="key required">first_name:</span> <span>"Laura"</span></li>
@@ -283,7 +294,7 @@
     // Attach click event to all elements with class 'toggle'
     document.querySelectorAll('li.toggle').forEach(function(item) {
       item.addEventListener('click', function(event) {
-        // Prevent event bubbling to parent li's
+        // Prevent event from bubbling up to parent nodes
         event.stopPropagation();
         this.classList.toggle('open');
         let childUl = this.querySelector('ul');
