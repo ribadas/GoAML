@@ -2,307 +2,736 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>XML Schema Visualization (FIU goAML Specification)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>goAML Report - Expandable Tree</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    ul {
+    .tree ul {
       list-style-type: none;
       padding-left: 20px;
-      margin: 0;
     }
-    li {
-      cursor: pointer;
-      margin: 2px 0;
+    .tree li {
+      margin: 5px 0;
       position: relative;
     }
-    /* Caret for expandable nodes */
-    li.toggle::before {
-      content: "\25B6"; /* Right arrow */
-      display: inline-block;
-      width: 1em;
-      margin-left: -1em;
-      padding-right: 5px;
+    .tree li.has-children::before {
+      content: "▶";
+      margin-right: 5px;
+      cursor: pointer;
+      color: #333;
     }
-    li.toggle.open::before {
-      content: "\25BC"; /* Down arrow */
+    .tree li.has-children.open::before {
+      content: "▼";
     }
-    .hidden {
+    .tree ul.hidden {
       display: none;
     }
-    /* Styling for keys and lookup values */
-    .required {
-      color: red;
+    .tree li {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .tree .label {
       font-weight: bold;
+      color: #2c3e50;
+      cursor: pointer;
+      position: relative;
     }
-    .optional {
-      color: blue;
+    .tree .value {
+      color: #7f8c8d;
     }
-    .lookup {
-      color: green;
+    .tree .label:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      background: #333;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      top: -30px;
+      left: 0;
+      white-space: nowrap;
+      z-index: 10;
     }
-    .key {
-      font-weight: bold;
+    .lookup-values {
+      display: none;
+      background: #f0f0f0;
+      padding: 5px;
+      margin-top: 5px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .lookup-values ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .lookup-values li {
+      margin: 2px 0;
     }
   </style>
 </head>
 <body>
-  <h2>XML Schema Visualization (FIU goAML Specification)</h2>
-  <ul class="tree">
-    <li class="toggle">report
-      <ul class="hidden">
-        <li><span class="key required">rentity_id:</span> <span>1002345</span> (Integer) - Reporting Entity ID</li>
-        <li><span class="key optional">rentity_branch:</span> <span>"Berlin Main Branch"</span></li>
-        <li><span class="key required">submission_code:</span> <span class="lookup">"E"</span> (submission_type) - Electronically submitted</li>
-        <li><span class="key required">report_code:</span> <span class="lookup">"VMT"</span> (report_type) - Report with transaction</li>
-        <li><span class="key required">entity_reference:</span> <span>"REF-2025-001"</span></li>
-        <li><span class="key optional">fiu_ref_number:</span> <span>"FIU-2025-XYZ"</span></li>
-        <li><span class="key required">submission_date:</span> <span>"2025-03-25T14:30:00"</span></li>
-        <li><span class="key required">currency_code_local:</span> <span class="lookup">"EUR"</span> (currency_type)</li>
-        <li class="toggle">reporting_entity <span class="optional">(Opt.)</span>
-          <ul class="hidden">
-            <li><span class="key required">entity_id:</span> <span>1002345</span></li>
-            <li><span class="key optional">branch:</span> <span>"Berlin Main Branch"</span></li>
-            <!-- incorporation_country_code as per the PDF -->
-            <li><span class="key required">incorporation_country_code:</span> <span class="lookup">"DE"</span> (country_type)</li>
-            <li><span class="key required">country_code:</span> <span class="lookup">"DE"</span> (country_type)</li>
-          </ul>
-        </li>
-        <li class="toggle">reporting_person <span class="optional">(Opt.)</span>
-          <ul class="hidden">
-            <li><span class="key required">first_name:</span> <span>"John"</span></li>
-            <li><span class="key required">last_name:</span> <span>"Doe"</span></li>
-            <li><span class="key optional">email:</span> <span>"john.doe@example.com"</span></li>
-          </ul>
-        </li>
-        <li class="toggle">location <span class="optional">(Opt.)</span>
-          <ul class="hidden">
-            <li><span class="key required">address_type:</span> <span class="lookup">"1"</span> (contact_type) - Business</li>
-            <li><span class="key required">address:</span> <span>"Friedrichstraße 123"</span></li>
-            <li><span class="key required">city:</span> <span>"Berlin"</span></li>
-            <li><span class="key optional">zip:</span> <span>"10117"</span></li>
-            <li><span class="key required">country_code:</span> <span class="lookup">"DE"</span> (country_type)</li>
-          </ul>
-        </li>
-        <!-- The official specification uses the fields 'reason' and 'action' (repurposed fields) -->
-        <li><span class="key optional">reason:</span> <span>"Suspicious transaction with unclear origin."</span></li>
-        <li><span class="key optional">action:</span> <span>"Pending further investigation."</span></li>
-        <li class="toggle">transaction <span class="required">(Multiple)</span>
-          <ul class="hidden">
-            <!-- Transaction 1 -->
-            <li class="toggle">transaction
-              <ul class="hidden">
-                <li><span class="key required">transactionnumber:</span> <span>"TXN-2025-56789"</span></li>
-                <li><span class="key optional">internal_ref_number:</span> <span>"BANK-REF-987654"</span></li>
-                <li><span class="key optional">transaction_location:</span> <span>"Berlin ATM 005"</span></li>
-                <li><span class="key optional">transaction_description:</span> <span>"Large cash deposit without declared source"</span></li>
-                <li><span class="key required">date_transaction:</span> <span>"2025-03-24T10:15:00"</span></li>
-                <li><span class="key required">transmode_code:</span> <span class="lookup">"1"</span> (conduction_type) - Electronic</li>
-                <li><span class="key required">amount_local:</span> <span>"50000.00"</span></li>
-                <li class="toggle">t_from_my_client
-                  <ul class="hidden">
-                    <li><span class="key required">from_funds_code:</span> <span class="lookup">"3"</span> (funds_type) - Cash</li>
-                    <li class="toggle">from_foreign_currency <span class="optional">(Opt.)</span>
-                      <ul class="hidden">
-                        <li><span class="key required">foreign_currency_code:</span> <span class="lookup">"USD"</span> (currency_type)</li>
-                        <li><span class="key required">foreign_amount:</span> <span>"53000.00"</span></li>
-                        <li><span class="key required">foreign_exchange_rate:</span> <span>"1.06"</span></li>
-                      </ul>
-                    </li>
-                    <li class="toggle">from_person (t_person_my_client)
-                      <ul class="hidden">
-                        <li><span class="key required">gender:</span> <span class="lookup">"M"</span> (gender_type)</li>
-                        <li><span class="key required">first_name:</span> <span>"Michael"</span></li>
-                        <li><span class="key optional">middle_name:</span> <span>"James"</span></li>
-                        <li><span class="key required">last_name:</span> <span>"Schmidt"</span></li>
-                        <li><span class="key required">birthdate:</span> <span>"1980-05-10"</span></li>
-                        <li><span class="key required">nationality1:</span> <span class="lookup">"DE"</span> (country_type) - Germany</li>
-                        <li><span class="key optional">nationality2:</span> <span>"US"</span></li>
-                        <li><span class="key required">residence:</span> <span class="lookup">"DE"</span> (country_type) - Germany</li>
-                        <li><span class="key required">occupation:</span> <span>"Business Owner"</span></li>
-                        <li><span class="key optional">employer_name:</span> <span>"Schmidt GmbH"</span></li>
-                        <li class="toggle">identification (t_person_identification)
-                          <ul class="hidden">
-                            <li><span class="key required">type:</span> <span class="lookup">"2"</span> (identifier_type) - Passport</li>
-                            <li><span class="key required">number:</span> <span>"C1234567"</span></li>
-                            <li><span class="key required">issue_country:</span> <span class="lookup">"DE"</span> (country_type)</li>
-                          </ul>
-                        </li>
-                        <li class="toggle">phones (Multiple)
-                          <ul class="hidden">
-                            <li><span class="key required">tph_contact_type:</span> <span class="lookup">"1"</span> (contact_type) - Business</li>
-                            <li><span class="key required">tph_number:</span> <span>"+49-170-1234567"</span></li>
-                          </ul>
-                        </li>
-                        <li class="toggle">addresses (Multiple)
-                          <ul class="hidden">
-                            <li><span class="key required">address_type:</span> <span class="lookup">"1"</span> (contact_type) - Business</li>
-                            <li><span class="key required">address:</span> <span>"Ludwigstraße 5"</span></li>
-                            <li><span class="key required">city:</span> <span>"Frankfurt"</span></li>
-                            <li><span class="key required">country_code:</span> <span class="lookup">"DE"</span></li>
-                          </ul>
-                        </li>
-                      </ul>
-                    </li>
-                    <li><span class="key required">from_country:</span> <span class="lookup">"DE"</span> (country_type)</li>
-                  </ul>
-                </li>
-                <li class="toggle">t_to_my_client
-                  <ul class="hidden">
-                    <li><span class="key required">to_funds_code:</span> <span class="lookup">"1"</span> (funds_type) - Account</li>
-                    <li class="toggle">to_account (t_account_my_client)
-                      <ul class="hidden">
-                        <li><span class="key required">institution_name:</span> <span>"Deutsche Bank"</span></li>
-                        <li><span class="key required">branch:</span> <span>"Berlin"</span></li>
-                        <li><span class="key required">account:</span> <span>"DE12345678901234567890"</span></li>
-                        <li><span class="key required">currency_code:</span> <span class="lookup">"EUR"</span> (currency_type)</li>
-                        <li><span class="key required">account_name:</span> <span>"Michael Schmidt Personal Account"</span></li>
-                        <li><span class="key required">opened:</span> <span>"2015-08-12"</span></li>
-                        <li><span class="key required">balance:</span> <span>"120000.00"</span></li>
-                        <li><span class="key required">status_code:</span> <span class="lookup">"1"</span> (account_status_type) - Active</li>
-                      </ul>
-                    </li>
-                    <li><span class="key required">to_country:</span> <span class="lookup">"DE"</span> (country_type)</li>
-                  </ul>
-                </li>
-                <li class="toggle">goods_services <span class="optional">(Opt.) (t_trans_item)</span>
-                  <ul class="hidden">
-                    <li><span class="key required">item_type:</span> <span class="lookup">"1"</span> (trans_item_type) - Motor Vehicle</li>
-                    <li><span class="key required">description:</span> <span>"2024 BMW X5 Black"</span></li>
-                    <li><span class="key required">estimated_value:</span> <span>"75000.00"</span></li>
-                    <li><span class="key required">status_code:</span> <span class="lookup">"2"</span> (trans_item_status) - Sold</li>
-                  </ul>
-                </li>
-                <li class="toggle">additional_info
-                  <ul class="hidden">
-                    <li><span class="key optional">purpose:</span> <span>"Business Payment"</span></li>
-                    <li><span class="key optional">reference:</span> <span>"INV-2025-9987"</span></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <!-- Transaction 2 -->
-            <li class="toggle">transaction
-              <ul class="hidden">
-                <li><span class="key required">transactionnumber:</span> <span>"TXN-2025-56790"</span></li>
-                <li><span class="key optional">internal_ref_number:</span> <span>"BANK-REF-987655"</span></li>
-                <li><span class="key optional">transaction_location:</span> <span>"Berlin Branch Office"</span></li>
-                <li><span class="key optional">transaction_description:</span> <span>"Wire transfer for invoice payment"</span></li>
-                <li><span class="key required">date_transaction:</span> <span>"2025-03-23T09:00:00"</span></li>
-                <li><span class="key required">transmode_code:</span> <span class="lookup">"9"</span> (conduction_type) - Online Banking</li>
-                <li><span class="key required">amount_local:</span> <span>"25000.00"</span></li>
-                <li class="toggle">t_from_my_client
-                  <ul class="hidden">
-                    <li><span class="key required">from_funds_code:</span> <span class="lookup">"2"</span> (funds_type) - Deposit</li>
-                    <!-- No foreign currency provided for this transaction -->                    
-                    <li class="toggle">from_person (t_person_my_client)
-                      <ul class="hidden">
-                        <li><span class="key required">gender:</span> <span class="lookup">"F"</span> (gender_type)</li>
-                        <li><span class="key required">first_name:</span> <span>"Laura"</span></li>
-                        <li><span class="key required">last_name:</span> <span>"Müller"</span></li>
-                        <li><span class="key required">birthdate:</span> <span>"1985-11-20"</span></li>
-                        <li><span class="key required">nationality1:</span> <span class="lookup">"DE"</span> (country_type) - Germany</li>
-                        <li><span class="key required">residence:</span> <span class="lookup">"DE"</span></li>
-                        <li><span class="key required">occupation:</span> <span>"Accountant"</span></li>
-                        <li class="toggle">phones (Multiple)
-                          <ul class="hidden">
-                            <li><span class="key required">tph_contact_type:</span> <span class="lookup">"1"</span> (contact_type) - Business</li>
-                            <li><span class="key required">tph_number:</span> <span>"+49-160-9876543"</span></li>
-                          </ul>
-                        </li>
-                        <li class="toggle">addresses (Multiple)
-                          <ul class="hidden">
-                            <li><span class="key required">address_type:</span> <span class="lookup">"1"</span> (contact_type) - Business</li>
-                            <li><span class="key required">address:</span> <span>"Karl-Marx-Straße 15"</span></li>
-                            <li><span class="key required">city:</span> <span>"Berlin"</span></li>
-                            <li><span class="key required">country_code:</span> <span class="lookup">"DE"</span></li>
-                          </ul>
-                        </li>
-                      </ul>
-                    </li>
-                    <li><span class="key required">from_country:</span> <span class="lookup">"DE"</span> (country_type)</li>
-                  </ul>
-                </li>
-                <li class="toggle">t_to_my_client
-                  <ul class="hidden">
-                    <li><span class="key required">to_funds_code:</span> <span class="lookup">"1"</span> (funds_type) - Account</li>
-                    <li class="toggle">to_account (t_account_my_client)
-                      <ul class="hidden">
-                        <li><span class="key required">institution_name:</span> <span>"Commerzbank"</span></li>
-                        <li><span class="key required">branch:</span> <span>"Berlin"</span></li>
-                        <li><span class="key required">account:</span> <span>"DE09876543210987654321"</span></li>
-                        <li><span class="key required">currency_code:</span> <span class="lookup">"EUR"</span> (currency_type)</li>
-                        <li><span class="key required">account_name:</span> <span>"Laura Müller Business Account"</span></li>
-                        <li><span class="key required">opened:</span> <span>"2018-04-05"</span></li>
-                        <li><span class="key required">balance:</span> <span>"85000.00"</span></li>
-                        <li><span class="key required">status_code:</span> <span class="lookup">"1"</span> (account_status_type) - Active</li>
-                      </ul>
-                    </li>
-                    <li><span class="key required">to_country:</span> <span class="lookup">"DE"</span> (country_type)</li>
-                  </ul>
-                </li>
-                <li class="toggle">goods_services <span class="optional">(Opt.) (t_trans_item)</span>
-                  <ul class="hidden">
-                    <li><span class="key required">item_type:</span> <span class="lookup">"3"</span> (trans_item_type) - Aircraft</li>
-                    <li><span class="key required">description:</span> <span>"Private Jet - Gulfstream"</span></li>
-                    <li><span class="key required">estimated_value:</span> <span>"4500000.00"</span></li>
-                    <li><span class="key required">status_code:</span> <span class="lookup">"2"</span> (trans_item_status) - Sold</li>
-                  </ul>
-                </li>
-                <li class="toggle">additional_info
-                  <ul class="hidden">
-                    <li><span class="key optional">purpose:</span> <span>"Invoice Payment"</span></li>
-                    <li><span class="key optional">reference:</span> <span>"INV-2025-1234"</span></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li class="toggle">activity <span class="required">(Multiple)</span>
-          <ul class="hidden">
-            <li class="toggle">report_party
-              <ul class="hidden">
-                <li><span class="key required">role:</span> <span class="lookup">"10"</span> (party_role_type) - Buyer</li>
-                <li class="toggle">person (t_person)
-                  <ul class="hidden">
-                    <li><span class="key required">first_name:</span> <span>"Anna"</span></li>
-                    <li><span class="key required">last_name:</span> <span>"Weber"</span></li>
-                    <li><span class="key required">nationality1:</span> <span class="lookup">"DE"</span> (country_type)</li>
-                    <li><span class="key required">residence:</span> <span class="lookup">"DE"</span></li>
-                  </ul>
-                </li>
-                <li><span class="key required">country:</span> <span class="lookup">"DE"</span></li>
-                <li><span class="key optional">comments:</span> <span>"Involved in high-value cash transaction"</span></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li class="toggle">report_indicators <span class="required">(Multiple)</span>
-          <ul class="hidden">
-            <li><span class="key required">indicator:</span> <span class="lookup">"A1000"</span> (report_indicator_type) - Money Laundering</li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-  </ul>
+  <h1>goAML Suspicious Transaction Report</h1>
+  <div id="tree" class="tree"></div>
 
   <script>
-    // Attach click event to all elements with class 'toggle'
-    document.querySelectorAll('li.toggle').forEach(function(item) {
-      item.addEventListener('click', function(event) {
-        // Prevent event from bubbling up to parent nodes
-        event.stopPropagation();
-        this.classList.toggle('open');
-        let childUl = this.querySelector('ul');
-        if (childUl) {
-          childUl.classList.toggle('hidden');
+    // Updated field dictionary with code and description for lookup values
+    const fieldDictionary = {
+      "rentity_id": { description: "Unique identifier of the reporting entity (e.g., FIU-DE-001).", lookup_values: null },
+      "rentity_branch": { description: "Branch of the reporting entity submitting the report.", lookup_values: null },
+      "submission_date": { description: "Date when the report is submitted to the FIU (format: YYYY-MM-DD).", lookup_values: null },
+      "report_id": { description: "Unique identifier for the report (e.g., STR-2025-0001).", lookup_values: null },
+      "report_type": {
+        description: "Type of report being submitted.",
+        lookup_values: [
+          { code: "STR", description: "Suspicious Transaction Report" },
+          { code: "CTR", description: "Currency Transaction Report" },
+          { code: "EFT", description: "Electronic Funds Transfer" },
+          { code: "IFT", description: "International Funds Transfer" },
+          { code: "TFR", description: "Terrorist Financing Report" },
+          { code: "BCR", description: "Border Cash Report" },
+          { code: "UTR", description: "Unusual Transaction Report" },
+          { code: "AIF", description: "Additional Information File" },
+          { code: "IRI", description: "Incoming Request for Information" },
+          { code: "ORI", description: "Outgoing Request for Information" },
+          { code: "IRD", description: "Incoming Response to a Request" },
+          { code: "ORD", description: "Outgoing Response to a Request" }
+        ]
+      },
+      "priority": { description: "Priority level of the report (e.g., High, Medium, Low).", lookup_values: null },
+      "submission_type": {
+        description: "Method of report submission.",
+        lookup_values: [
+          { code: "E", description: "Electronically" },
+          { code: "M", description: "Manually" }
+        ]
+      },
+      "reporting_date": { description: "Date when the suspicious activity was identified (format: YYYY-MM-DD).", lookup_values: null },
+      "legal_basis": { description: "Legal basis for submitting the report (e.g., GwG § 43).", lookup_values: null },
+      "comments": { description: "Additional comments or notes about the report.", lookup_values: null },
+      "first_name": { description: "First name of the person (e.g., reporting person or party involved).", lookup_values: null },
+      "last_name": { description: "Last name of the person (e.g., reporting person or party involved).", lookup_values: null },
+      "title": { description: "Professional title of the reporting person (e.g., Compliance Officer).", lookup_values: null },
+      "phone": { description: "Phone number of the person (format: +[country code][number]).", lookup_values: null },
+      "email": { description: "Email address of the person.", lookup_values: null },
+      "t_number": { description: "Unique identifier for the transaction (e.g., TX-001).", lookup_values: null },
+      "t_date_time": { description: "Date and time of the transaction (format: YYYY-MM-DDThh:mm:ss).", lookup_values: null },
+      "amount_local": { description: "Transaction amount in local currency.", lookup_values: null },
+      "currency": {
+        description: "Currency code for the local amount (ISO 4217).",
+        lookup_values: [
+          { code: "EUR", description: "Euro" },
+          { code: "USD", description: "United States Dollar" },
+          { code: "CHF", description: "Swiss Franc" },
+          { code: "GBP", description: "British Pound Sterling" },
+          { code: "JPY", description: "Japanese Yen" },
+          { code: "AUD", description: "Australian Dollar" },
+          { code: "CAD", description: "Canadian Dollar" },
+          { code: "CNY", description: "Chinese Yuan" }
+        ]
+      },
+      "amount_foreign": { description: "Transaction amount in foreign currency (if applicable).", lookup_values: null },
+      "foreign_currency": {
+        description: "Currency code for the foreign amount (ISO 4217).",
+        lookup_values: [
+          { code: "EUR", description: "Euro" },
+          { code: "USD", description: "United States Dollar" },
+          { code: "CHF", description: "Swiss Franc" },
+          { code: "GBP", description: "British Pound Sterling" },
+          { code: "JPY", description: "Japanese Yen" },
+          { code: "AUD", description: "Australian Dollar" },
+          { code: "CAD", description: "Canadian Dollar" },
+          { code: "CNY", description: "Chinese Yuan" }
+        ]
+      },
+      "exchange_rate": { description: "Exchange rate used for conversion between local and foreign currency.", lookup_values: null },
+      "t_type": {
+        description: "Type of transaction.",
+        lookup_values: [
+          { code: "WIRE", description: "Wire Transfer" },
+          { code: "CASHDEP", description: "Cash Deposit" },
+          { code: "CASHWDL", description: "Cash Withdrawal" },
+          { code: "CHECK", description: "Check Payment" },
+          { code: "TRANSFER", description: "Internal Transfer" },
+          { code: "ACH", description: "Automated Clearing House Transfer" },
+          { code: "CARD", description: "Credit/Debit Card Transaction" }
+        ]
+      },
+      "direction": {
+        description: "Direction of the transaction (Incoming or Outgoing).",
+        lookup_values: [
+          { code: "Incoming", description: "Funds received" },
+          { code: "Outgoing", description: "Funds sent" }
+        ]
+      },
+      "description": { description: "Description of the transaction or activity.", lookup_values: null },
+      "account_number": { description: "Account number associated with the transaction or party.", lookup_values: null },
+      "institution_name": { description: "Name of the financial institution holding the account.", lookup_values: null },
+      "iban": { description: "International Bank Account Number (IBAN) of the account.", lookup_values: null },
+      "account_type": {
+        description: "Type of account.",
+        lookup_values: [
+          { code: "A", description: "Business" },
+          { code: "B", description: "Personal Current" },
+          { code: "C", description: "Savings" },
+          { code: "D", description: "Trust Account" },
+          { code: "E", description: "Trading Account" },
+          { code: "O", description: "Other" }
+        ]
+      },
+      "gender": {
+        description: "Gender of the person.",
+        lookup_values: [
+          { code: "M", description: "Male" },
+          { code: "F", description: "Female" },
+          { code: "O", description: "Other" }
+        ]
+      },
+      "nationality": {
+        description: "Nationality of the person (ISO 3166-1 alpha-2 code).",
+        lookup_values: [
+          { code: "DE", description: "Germany" },
+          { code: "CH", description: "Switzerland" },
+          { code: "US", description: "United States" },
+          { code: "GB", description: "United Kingdom" },
+          { code: "JP", description: "Japan" },
+          { code: "AU", description: "Australia" },
+          { code: "CA", description: "Canada" },
+          { code: "CN", description: "China" }
+        ]
+      },
+      "birth_date": { description: "Date of birth of the person (format: YYYY-MM-DD).", lookup_values: null },
+      "id_number": { description: "Identification number of the person.", lookup_values: null },
+      "id_type": {
+        description: "Type of identification document.",
+        lookup_values: [
+          { code: "A", description: "Driver's license" },
+          { code: "B", description: "Identity Card" },
+          { code: "C", description: "Passport" },
+          { code: "O", description: "Other" }
+        ]
+      },
+      "issue_country": {
+        description: "Country that issued the identification document (ISO 3166-1 alpha-2 code).",
+        lookup_values: [
+          { code: "DE", description: "Germany" },
+          { code: "CH", description: "Switzerland" },
+          { code: "US", description: "United States" },
+          { code: "GB", description: "United Kingdom" },
+          { code: "JP", description: "Japan" },
+          { code: "AU", description: "Australia" },
+          { code: "CA", description: "Canada" },
+          { code: "CN", description: "China" }
+        ]
+      },
+      "street": { description: "Street name of the address.", lookup_values: null },
+      "city": { description: "City of the address.", lookup_values: null },
+      "zip": { description: "Postal code of the address.", lookup_values: null },
+      "country": {
+        description: "Country of the address (ISO 3166-1 alpha-2 code).",
+        lookup_values: [
+          { code: "DE", description: "Germany" },
+          { code: "CH", description: "Switzerland" },
+          { code: "US", description: "United States" },
+          { code: "GB", description: "United Kingdom" },
+          { code: "JP", description: "Japan" },
+          { code: "AU", description: "Australia" },
+          { code: "CA", description: "Canada" },
+          { code: "CN", description: "China" }
+        ]
+      },
+      "activity_id": { description: "Unique identifier for the activity (e.g., ACT-2025-0001).", lookup_values: null },
+      "activity_type": {
+        description: "Type of activity being reported.",
+        lookup_values: [
+          { code: "Suspicious Transaction", description: "Suspicious Transaction Activity" },
+          { code: "Terrorist Financing", description: "Terrorist Financing Activity" },
+          { code: "Money Laundering", description: "Money Laundering Activity" },
+          { code: "Fraud", description: "Fraudulent Activity" }
+        ]
+      },
+      "start_date": { description: "Start date of the activity (format: YYYY-MM-DD).", lookup_values: null },
+      "end_date": { description: "End date of the activity (format: YYYY-MM-DD).", lookup_values: null },
+      "role": {
+        description: "Role of the party in the activity (e.g., Client, Counterparty).",
+        lookup_values: [
+          { code: "Client", description: "Client of the reporting entity" },
+          { code: "Counterparty", description: "Counterparty in the transaction" },
+          { code: "Depositor", description: "Person making a deposit" },
+          { code: "Beneficiary", description: "Beneficiary of the transaction" },
+          { code: "Agent", description: "Agent acting on behalf of a party" }
+        ]
+      },
+      "name": { description: "Name of the organization (e.g., Swiss Trading GmbH).", lookup_values: null },
+      "registration_number": { description: "Registration number of the organization.", lookup_values: null },
+      "registration_country": {
+        description: "Country where the organization is registered (ISO 3166-1 alpha-2 code).",
+        lookup_values: [
+          { code: "DE", description: "Germany" },
+          { code: "CH", description: "Switzerland" },
+          { code: "US", description: "United States" },
+          { code: "GB", description: "United Kingdom" },
+          { code: "JP", description: "Japan" },
+          { code: "AU", description: "Australia" },
+          { code: "CA", description: "Canada" },
+          { code: "CN", description: "China" }
+        ]
+      },
+      "transaction_ref": { description: "Reference to a transaction ID within the activity.", lookup_values: null },
+      "indicator": {
+        description: "Suspicion indicator code and description.",
+        lookup_values: [
+          { code: "UH", description: "Unusually high transaction volume" },
+          { code: "HR", description: "Cross-border transfer to high-risk jurisdiction" },
+          { code: "CS", description: "Frequent cash deposits" },
+          { code: "ML", description: "Potential money laundering" },
+          { code: "TF", description: "Potential terrorist financing" }
+        ]
+      },
+      "branch_name": { description: "Name of the branch where the transaction occurred.", lookup_values: null }
+    };
+
+    // XML string (same as before)
+    const xmlString = `<?xml version="1.0" encoding="UTF-8"?>
+<goaml xmlns="http://www.goaml.org/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.goaml.org/schema goAMLSchema.xsd">
+  <report>
+    <rentity_id>FIU-DE-001</rentity_id>
+    <rentity_branch>Berlin Branch</rentity_branch>
+    <submission_date>2025-03-25</submission_date>
+    <report_id>STR-2025-0001</report_id>
+    <report_type>STR</report_type>
+    <priority>High</priority>
+    <submission_type>New</submission_type>
+    <reporting_date>2025-03-24</reporting_date>
+    <legal_basis>GwG § 43</legal_basis>
+    <comments>Suspicious activity detected in cross-border transactions</comments>
+    <reporting_person>
+      <first_name>Thomas</first_name>
+      <last_name>Müller</last_name>
+      <title>Compliance Officer</title>
+      <phone>+493012345678</phone>
+      <email>thomas.mueller@bank.de</email>
+    </reporting_person>
+    <transaction>
+      <t_number>TX-001</t_number>
+      <t_date_time>2025-03-20T14:30:00</t_date_time>
+      <amount_local>10000.00</amount_local>
+      <currency>EUR</currency>
+      <amount_foreign>10850.00</amount_foreign>
+      <foreign_currency>CHF</foreign_currency>
+      <exchange_rate>1.085</exchange_rate>
+      <t_type>WIRE</t_type>
+      <direction>Outgoing</direction>
+      <t_from_my_client>
+        <first_name>Anna</first_name>
+        <last_name>Schmidt</last_name>
+        <gender>F</gender>
+        <nationality>DE</nationality>
+        <birth_date>1985-06-15</birth_date>
+        <identification>
+          <id_number>T123456789</id_number>
+          <id_type>TaxID</id_type>
+          <issue_country>DE</issue_country>
+        </identification>
+        <address>
+          <street>Hauptstraße 10</street>
+          <city>Berlin</city>
+          <zip>10115</zip>
+          <country>DE</country>
+        </address>
+        <account_number>DE89370400440532013000</account_number>
+        <institution_name>Deutsche Bank AG</institution_name>
+        <iban>DE89370400440532013000</iban>
+        <account_type>Checking</account_type>
+      </t_from_my_client>
+      <t_to>
+        <to_account>
+          <account_number>CH12345678901234567890</account_number>
+          <institution_name>UBS Switzerland AG</institution_name>
+          <iban>CH12345678901234567890</iban>
+          <account_type>Business</account_type>
+        </to_account>
+      </t_to>
+      <description>Payment for consulting services</description>
+    </transaction>
+    <transaction>
+      <t_number>TX-002</t_number>
+      <t_date_time>2025-03-21T09:15:00</t_date_time>
+      <amount_local>5000.00</amount_local>
+      <currency>EUR</currency>
+      <t_type>CASHDEP</t_type>
+      <direction>Incoming</direction>
+      <t_from>
+        <from_person>
+          <first_name>Unknown</first_name>
+          <last_name>Cash Depositor</last_name>
+        </from_person>
+      </t_from>
+      <t_to_my_account>
+        <account_number>DE89370400440532013000</account_number>
+        <institution_name>Deutsche Bank AG</institution_name>
+        <iban>DE89370400440532013000</iban>
+        <account_type>Checking</account_type>
+      </t_to_my_account>
+      <location>
+        <branch_name>Deutsche Bank Berlin Mitte</branch_name>
+        <address>
+          <street>Friedrichstraße 50</street>
+          <city>Berlin</city>
+          <country>DE</country>
+        </address>
+      </location>
+      <description>Cash deposit by client</description>
+    </transaction>
+    <transaction>
+      <t_number>TX-003</t_number>
+      <t_date_time>2025-03-23T16:00:00</t_date_time>
+      <amount_local>7500.00</amount_local>
+      <currency>EUR</currency>
+      <t_type>WIRE</t_type>
+      <direction>Incoming</direction>
+      <t_from>
+        <from_account>
+          <account_number>CH12345678901234567890</account_number>
+          <institution_name>UBS Switzerland AG</institution_name>
+          <iban>CH12345678901234567890</iban>
+          <account_type>Business</account_type>
+        </from_account>
+      </t_from>
+      <t_to_my_client>
+        <first_name>Anna</first_name>
+        <last_name>Schmidt</last_name>
+        <gender>F</gender>
+        <nationality>DE</nationality>
+        <birth_date>1985-06-15</birth_date>
+        <identification>
+          <id_number>T123456789</id_number>
+          <id_type>TaxID</id_type>
+          <issue_country>DE</issue_country>
+        </identification>
+        <address>
+          <street>Hauptstraße 10</street>
+          <city>Berlin</city>
+          <zip>10115</zip>
+          <country>DE</country>
+        </address>
+        <account_number>DE89370400440532013000</account_number>
+      </t_to_my_client>
+      <description>Payment received from Swiss entity</description>
+    </transaction>
+    <activity>
+      <activity_id>ACT-2025-0001</activity_id>
+      <activity_type>Suspicious Transaction</activity_type>
+      <description>Rapid succession of large cross-border transactions and cash deposits involving the same client account, indicating potential money laundering.</description>
+      <start_date>2025-03-20</start_date>
+      <end_date>2025-03-23</end_date>
+      <involved_parties>
+        <party>
+          <role>Client</role>
+          <person>
+            <first_name>Anna</first_name>
+            <last_name>Schmidt</last_name>
+            <gender>F</gender>
+            <nationality>DE</nationality>
+            <birth_date>1985-06-15</birth_date>
+            <identification>
+              <id_number>T123456789</id_number>
+              <id_type>TaxID</id_type>
+              <issue_country>DE</issue_country>
+            </identification>
+            <address>
+              <street>Hauptstraße 10</street>
+              <city>Berlin</city>
+              <zip>10115</zip>
+              <country>DE</country>
+            </address>
+          </person>
+          <account>
+            <account_number>DE89370400440532013000</account_number>
+            <institution_name>Deutsche Bank AG</institution_name>
+            <iban>DE89370400440532013000</iban>
+            <account_type>Checking</account_type>
+          </account>
+        </party>
+        <party>
+          <role>Counterparty</role>
+          <organization>
+            <name>Swiss Trading GmbH</name>
+            <registration_number>CHE-123.456.789</registration_number>
+            <registration_country>CH</registration_country>
+            <address>
+              <street>Bahnhofstrasse 25</street>
+              <city>Zurich</city>
+              <zip>8001</zip>
+              <country>CH</country>
+            </address>
+          </organization>
+          <account>
+            <account_number>CH12345678901234567890</account_number>
+            <institution_name>UBS Switzerland AG</institution_name>
+            <iban>CH12345678901234567890</iban>
+            <account_type>Business</account_type>
+          </account>
+        </party>
+        <party>
+          <role>Depositor</role>
+          <person>
+            <first_name>Unknown</first_name>
+            <last_name>Cash Depositor</last_name>
+          </person>
+        </party>
+      </involved_parties>
+      <transactions>
+        <transaction_ref>TX-001</transaction_ref>
+        <transaction_ref>TX-002</transaction_ref>
+        <transaction_ref>TX-003</transaction_ref>
+      </transactions>
+      <indicators>
+        <indicator code="UH">Unusually high transaction volume</indicator>
+        <indicator code="HR">Cross-border transfer to high-risk jurisdiction</indicator>
+        <indicator code="CS">Frequent cash deposits</indicator>
+      </indicators>
+    </activity>
+    <indicators>
+      <indicator code="UH">Unusually high transaction volume</indicator>
+      <indicator code="HR">Cross-border transfer to high-risk jurisdiction</indicator>
+      <indicator code="CS">Frequent cash deposits</indicator>
+      <description>Suspicion based on rapid succession of large transactions.</description>
+    </indicators>
+  </report>
+</goaml>`;
+
+    // Parse XML with error handling
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
+      // Check for XML parsing errors
+      const parserError = xmlDoc.querySelector("parsererror");
+      if (parserError) {
+        console.error("XML Parsing Error:", parserError.textContent);
+        throw new Error("Failed to parse XML");
+      }
+
+      const reports = xmlDoc.getElementsByTagName("report");
+      console.log("Number of reports found:", reports.length);
+
+      // Convert XML to JSON-like structure
+      function xmlToJson(xml) {
+        const result = {};
+        Array.from(xml.childNodes).forEach(node => {
+          if (node.nodeType === 1) {
+            const key = node.tagName;
+            if (node.childNodes.length === 1 && node.childNodes[0].nodeType === 3) {
+              result[key] = node.textContent.trim();
+            } else {
+              const children = xmlToJson(node);
+              if (result[key]) {
+                if (!Array.isArray(result[key])) {
+                  result[key] = [result[key]];
+                }
+                result[key].push(children);
+              } else {
+                result[key] = children;
+              }
+            }
+          }
+        });
+        return result;
+      }
+
+      const data = Array.from(reports).map(report => xmlToJson(report));
+      console.log("Parsed data:", data);
+
+      // Build tree structure
+      function buildTree(data, parentElement) {
+        if (!data || data.length === 0) {
+          console.error("No data to build tree");
+          return;
         }
-      });
-    });
+        data.forEach((report, index) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<span class="label" data-field="report" data-tooltip="A goAML Suspicious Transaction Report">Report ${report.report_id || index + 1}</span>`;
+          li.classList.add("has-children");
+          parentElement.appendChild(li);
+
+          const ul = document.createElement("ul");
+          ul.classList.add("hidden");
+          buildSubTree(report, ul);
+          li.appendChild(ul);
+
+          li.addEventListener("click", (e) => {
+            e.stopPropagation();
+            ul.classList.toggle("hidden");
+            li.classList.toggle("open");
+          });
+        });
+      }
+
+      function buildSubTree(obj, parentElement) {
+        for (const [key, value] of Object.entries(obj)) {
+          const li = document.createElement("li");
+          if (typeof value === "object" && !Array.isArray(value)) {
+            const fieldInfo = fieldDictionary[key] || { description: "No description available", lookup_values: null };
+            li.innerHTML = `<span class="label" data-field="${key}" data-tooltip="${fieldInfo.description}">${key}</span>`;
+            li.classList.add("has-children");
+            const ul = document.createElement("ul");
+            ul.classList.add("hidden");
+            buildSubTree(value, ul);
+            li.appendChild(ul);
+
+            li.addEventListener("click", (e) => {
+              e.stopPropagation();
+              ul.classList.toggle("hidden");
+              li.classList.toggle("open");
+            });
+
+            // Add click handler for lookup values
+            const label = li.querySelector(".label");
+            label.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const existingLookup = li.querySelector(".lookup-values");
+              if (existingLookup) {
+                existingLookup.remove();
+                return;
+              }
+              if (fieldInfo.lookup_values) {
+                const lookupDiv = document.createElement("div");
+                lookupDiv.classList.add("lookup-values");
+                const ul = document.createElement("ul");
+                fieldInfo.lookup_values.forEach(value => {
+                  const li = document.createElement("li");
+                  li.textContent = `${value.code}: ${value.description}`;
+                  ul.appendChild(li);
+                });
+                lookupDiv.appendChild(ul);
+                li.appendChild(lookupDiv);
+                lookupDiv.style.display = "block";
+              }
+            });
+          } else if (Array.isArray(value)) {
+            const fieldInfo = fieldDictionary[key] || { description: "No description available", lookup_values: null };
+            li.innerHTML = `<span class="label" data-field="${key}" data-tooltip="${fieldInfo.description}">${key}</span>`;
+            li.classList.add("has-children");
+            const ul = document.createElement("ul");
+            ul.classList.add("hidden");
+            value.forEach((item, idx) => {
+              const itemLi = document.createElement("li");
+              itemLi.innerHTML = `<span class="label" data-field="${key}" data-tooltip="${fieldInfo.description}">${key} ${idx + 1}</span>`;
+              itemLi.classList.add("has-children");
+              const itemUl = document.createElement("ul");
+              itemUl.classList.add("hidden");
+              buildSubTree(item, itemUl);
+              itemLi.appendChild(itemUl);
+
+              itemLi.addEventListener("click", (e) => {
+                e.stopPropagation();
+                itemUl.classList.toggle("hidden");
+                itemLi.classList.toggle("open");
+              });
+
+              // Add click handler for lookup values
+              const itemLabel = itemLi.querySelector(".label");
+              itemLabel.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const existingLookup = itemLi.querySelector(".lookup-values");
+                if (existingLookup) {
+                  existingLookup.remove();
+                  return;
+                }
+                if (fieldInfo.lookup_values) {
+                  const lookupDiv = document.createElement("div");
+                  lookupDiv.classList.add("lookup-values");
+                  const ul = document.createElement("ul");
+                  fieldInfo.lookup_values.forEach(value => {
+                    const li = document.createElement("li");
+                    li.textContent = `${value.code}: ${value.description}`;
+                    ul.appendChild(li);
+                  });
+                  lookupDiv.appendChild(ul);
+                  itemLi.appendChild(lookupDiv);
+                  lookupDiv.style.display = "block";
+                }
+              });
+
+              ul.appendChild(itemLi);
+            });
+            li.appendChild(ul);
+
+            li.addEventListener("click", (e) => {
+              e.stopPropagation();
+              ul.classList.toggle("hidden");
+              li.classList.toggle("open");
+            });
+
+            // Add click handler for lookup values
+            const label = li.querySelector(".label");
+            label.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const existingLookup = li.querySelector(".lookup-values");
+              if (existingLookup) {
+                existingLookup.remove();
+                return;
+              }
+              if (fieldInfo.lookup_values) {
+                const lookupDiv = document.createElement("div");
+                lookupDiv.classList.add("lookup-values");
+                const ul = document.createElement("ul");
+                fieldInfo.lookup_values.forEach(value => {
+                  const li = document.createElement("li");
+                  li.textContent = `${value.code}: ${value.description}`;
+                  ul.appendChild(li);
+                });
+                lookupDiv.appendChild(ul);
+                li.appendChild(lookupDiv);
+                lookupDiv.style.display = "block";
+              }
+            });
+          } else {
+            const fieldInfo = fieldDictionary[key] || { description: "No description available", lookup_values: null };
+            li.innerHTML = `<span class="label" data-field="${key}" data-tooltip="${fieldInfo.description}">${key}:</span> <span class="value">${value}</span>`;
+            
+            // Add click handler for lookup values
+            const label = li.querySelector(".label");
+            label.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const existingLookup = li.querySelector(".lookup-values");
+              if (existingLookup) {
+                existingLookup.remove();
+                return;
+              }
+              if (fieldInfo.lookup_values) {
+                const lookupDiv = document.createElement("div");
+                lookupDiv.classList.add("lookup-values");
+                const ul = document.createElement("ul");
+                fieldInfo.lookup_values.forEach(value => {
+                  const li = document.createElement("li");
+                  li.textContent = `${value.code}: ${value.description}`;
+                  ul.appendChild(li);
+                });
+                lookupDiv.appendChild(ul);
+                li.appendChild(lookupDiv);
+                lookupDiv.style.display = "block";
+              }
+            });
+          }
+          parentElement.appendChild(li);
+        }
+      }
+
+      // Render tree
+      const treeDiv = document.getElementById("tree");
+      if (!treeDiv) {
+        console.error("Tree div not found in DOM");
+        throw new Error("Tree div not found");
+      }
+      const rootUl = document.createElement("ul");
+      buildTree(data, rootUl);
+      treeDiv.appendChild(rootUl);
+      console.log("Tree rendered successfully");
+    } catch (error) {
+      console.error("Error rendering tree:", error);
+      const treeDiv = document.getElementById("tree");
+      treeDiv.innerHTML = `<p style="color: red;">Error rendering report: ${error.message}. Check console for details.</p>`;
+    }
   </script>
 </body>
 </html>
